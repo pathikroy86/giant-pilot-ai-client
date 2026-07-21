@@ -7,10 +7,24 @@ import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 const initialFormData = {
   name: "",
   email: "",
+  role: "applicant",
   organizationName: "",
   organizationType: "Nonprofit",
   password: "",
 };
+
+const roleOptions = [
+  {
+    value: "applicant",
+    label: "Grant seeker",
+    description: "Find grants, save opportunities, and draft proposals.",
+  },
+  {
+    value: "funder",
+    label: "Funder",
+    description: "Review opportunities, publish grants, and track applicants.",
+  },
+];
 
 export default function SignupForm() {
   const [formData, setFormData] = useState(initialFormData);
@@ -43,8 +57,11 @@ export default function SignupForm() {
       }
 
       setFormData(initialFormData);
+      localStorage.setItem("grantpilot_user", JSON.stringify(data.user));
+      localStorage.setItem("grantpilot_auth_token", data.token);
+      window.dispatchEvent(new Event("grantpilot-auth-changed"));
       setStatus("success");
-      setMessage("Account created. Your organization profile is ready for grant matching.");
+      setMessage("Account created. Your role-based workspace is ready.");
     } catch (error) {
       setStatus("error");
       setMessage(error.message);
@@ -126,6 +143,43 @@ export default function SignupForm() {
           </select>
         </div>
       </div>
+
+      <fieldset>
+        <legend className="text-sm font-semibold text-slate-700">
+          Account role
+        </legend>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          {roleOptions.map((role) => {
+            const isSelected = formData.role === role.value;
+
+            return (
+              <label
+                key={role.value}
+                className={`cursor-pointer rounded-lg border p-4 transition ${
+                  isSelected
+                    ? "border-blue-500 bg-blue-50 ring-4 ring-blue-100"
+                    : "border-slate-200 bg-white hover:border-blue-200"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={role.value}
+                  checked={isSelected}
+                  onChange={updateField}
+                  className="sr-only"
+                />
+                <span className="block text-sm font-bold text-blue-950">
+                  {role.label}
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-500">
+                  {role.description}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <div>
         <label

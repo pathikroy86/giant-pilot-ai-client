@@ -1,9 +1,9 @@
 import SignupForm from "@/components/auth/SignupForm";
 
 const benefits = [
-  "Save grants and track readiness",
-  "Run eligibility checks against your organization profile",
-  "Prepare proposal outlines with approved facts",
+  "Grant seekers get matching, saved grants, and proposal planning",
+  "Funders get a workspace prepared for publishing and review flows",
+  "Each account is saved with a role for protected dashboard routing",
 ];
 
 export const metadata = {
@@ -23,8 +23,8 @@ export default function RegisterPage() {
             Create your grant workspace.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-            Start with your organization profile so GrantPilot can rank grants,
-            explain eligibility, and prepare stronger proposal plans.
+            Start with your organization profile and role so GrantPilot can
+            route you to the right workspace experience.
           </p>
 
           <div className="mt-8 space-y-4">
@@ -37,7 +37,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="mt-10 rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold text-blue-950">Demo workflow</p>
+            <p className="text-sm font-bold text-blue-950">Role workflow</p>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               {["Profile", "Match", "Draft"].map((step, index) => (
                 <div key={step} className="rounded-lg bg-slate-50 p-4">
@@ -55,8 +55,8 @@ export default function RegisterPage() {
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-blue-950">Sign up</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Your account will be stored in MongoDB and used for future
-              personalized grant recommendations.
+              Your account role will be stored in MongoDB and returned at login
+              for role-based navigation and protected workflows.
             </p>
           </div>
           <SignupForm />

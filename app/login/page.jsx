@@ -1,9 +1,9 @@
 import LoginForm from "@/components/auth/LoginForm";
 
-const activityItems = [
-  "6 new high-fit opportunities",
-  "3 saved grants ready for review",
-  "1 proposal outline awaiting approval",
+const workspaceItems = [
+  "Approved grants are loaded from MongoDB",
+  "Role-based dashboards route each user correctly",
+  "Admin review controls public grant visibility",
 ];
 
 export const metadata = {
@@ -24,8 +24,7 @@ export default function LoginPage() {
               Sign in to your workspace.
             </h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Continue reviewing grant matches, eligibility signals, saved
-              opportunities, and proposal drafts.
+              Continue reviewing the workspace your role can access.
             </p>
           </div>
           <LoginForm />
@@ -34,13 +33,13 @@ export default function LoginPage() {
         <aside className="flex flex-col justify-center">
           <div className="rounded-xl border border-blue-100 bg-blue-950 p-8 text-white shadow-sm">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
-              AI agent run
+              Workspace access
             </p>
             <h2 className="mt-4 text-3xl font-bold leading-tight">
-              Your grant intelligence keeps moving with you.
+              Your role controls which data and approvals you can manage.
             </h2>
             <div className="mt-8 space-y-4">
-              {activityItems.map((item) => (
+              {workspaceItems.map((item) => (
                 <div
                   key={item}
                   className="rounded-lg border border-white/15 bg-white/10 p-4"
@@ -53,9 +52,9 @@ export default function LoginPage() {
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[
-              ["92%", "best match"],
-              ["84%", "readiness"],
-              ["4/4", "tools complete"],
+              ["Admin", "approve grants"],
+              ["Funder", "track review"],
+              ["Seeker", "view approved"],
             ].map(([value, label]) => (
               <div
                 key={label}

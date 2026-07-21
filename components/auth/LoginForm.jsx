@@ -40,6 +40,8 @@ export default function LoginForm() {
       }
 
       localStorage.setItem("grantpilot_user", JSON.stringify(data.user));
+      localStorage.setItem("grantpilot_auth_token", data.token);
+      window.dispatchEvent(new Event("grantpilot-auth-changed"));
       setStatus("success");
       setMessage(`Welcome back, ${data.user.name}. Your workspace is ready.`);
     } catch (error) {

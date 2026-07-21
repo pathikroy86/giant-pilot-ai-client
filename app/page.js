@@ -1,41 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
-
-const featuredGrants = [
-  {
-    title: "Community Solar Innovation Fund",
-    category: "Environment",
-    amount: "$20k-$80k",
-    deadline: "Due in 18 days",
-    match: "92%",
-    summary:
-      "Capital and planning support for locally led clean-energy access projects.",
-  },
-  {
-    title: "Youth Skills Accelerator",
-    category: "Education",
-    amount: "$10k-$40k",
-    deadline: "Due in 26 days",
-    match: "91%",
-    summary:
-      "Workforce readiness grants for nonprofits serving young adults.",
-  },
-  {
-    title: "Digital Access Fund",
-    category: "Technology",
-    amount: "$35k-$120k",
-    deadline: "Due in 34 days",
-    match: "87%",
-    summary:
-      "Infrastructure and training funds for community broadband inclusion.",
-  },
-];
+import FeaturedGrants from "@/components/grants/FeaturedGrants";
+import PublicGrantStats from "@/components/grants/PublicGrantStats";
 
 const agentSteps = [
-  ["Profile Agent", "Learns your mission, region, capacity, and prior activity."],
-  ["Discovery Agent", "Scans grant sources and applies deterministic filters."],
-  ["Eligibility Agent", "Scores requirements, evidence gaps, and readiness risks."],
-  ["Proposal Agent", "Builds an editable, fact-grounded proposal outline."],
+  [
+    "Profile Agent",
+    "Learns your mission, region, capacity, and prior interactions.",
+    "Profile saved",
+  ],
+  [
+    "Discovery Agent",
+    "Scans grant sources and applies deterministic filters.",
+    "Sources checked",
+  ],
+  [
+    "Eligibility Agent",
+    "Scores requirements, evidence gaps, and readiness risks.",
+    "Fit explained",
+  ],
+  [
+    "Proposal Agent",
+    "Builds an editable outline from approved facts and evidence.",
+    "Human approved",
+  ],
 ];
 
 const capabilities = [
@@ -47,28 +35,6 @@ const capabilities = [
   "Exportable briefs for team handoff",
 ];
 
-const metrics = [
-  ["128", "grants scanned"],
-  ["14", "strong matches"],
-  ["72%", "draft readiness"],
-  ["4", "agent tools"],
-];
-
-const stories = [
-  {
-    quote:
-      "GrantPilot helped our small team focus on the three opportunities we could actually win.",
-    name: "Amina Rahman",
-    role: "Program Director, Bright Blocks",
-  },
-  {
-    quote:
-      "The eligibility report surfaced missing evidence before we wasted days drafting.",
-    name: "Jon Bell",
-    role: "Operations Lead, Civic Roots",
-  },
-];
-
 const insights = [
   "How to read a grant deadline like a project manager",
   "What funders mean by measurable community resilience",
@@ -77,8 +43,8 @@ const insights = [
 
 const faqs = [
   [
-    "Can I use demo data first?",
-    "Yes. The first build uses demo grants so the experience can be designed before connecting live data.",
+    "Why do grants need admin approval?",
+    "Only approved grants are returned by the public API, which keeps low-quality or incomplete listings out of the UI.",
   ],
   [
     "Does the AI submit grants automatically?",
@@ -133,19 +99,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="-mt-10 border-b border-slate-200 bg-white">
-        <div className="relative mx-auto grid max-w-7xl gap-4 px-4 pb-14 sm:px-6 lg:grid-cols-4 lg:px-8">
-          {metrics.map(([value, label]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <p className="text-3xl font-bold text-blue-950">{value}</p>
-              <p className="mt-1 text-sm font-medium text-slate-500">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <PublicGrantStats />
 
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -155,7 +109,7 @@ export default function Home() {
                 Featured grants
               </p>
               <h2 className="mt-3 text-3xl font-bold text-blue-950 sm:text-4xl">
-                Start with high-fit demo opportunities.
+                Start with high-fit live opportunities.
               </h2>
             </div>
             <Link
@@ -166,67 +120,97 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {featuredGrants.map((grant) => (
-              <article
-                key={grant.title}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="rounded-lg bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-700">
-                    {grant.category}
-                  </span>
-                  <span className="text-2xl font-bold text-blue-700">
-                    {grant.match}
-                  </span>
-                </div>
-                <h3 className="mt-5 text-xl font-bold text-blue-950">
-                  {grant.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {grant.summary}
-                </p>
-                <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5 text-sm">
-                  <span className="font-semibold text-slate-700">
-                    {grant.amount}
-                  </span>
-                  <span className="text-slate-500">{grant.deadline}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+          <FeaturedGrants />
         </div>
       </section>
 
       <section id="how-it-works" className="bg-slate-50 py-20">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-          <div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
               How agents work
             </p>
             <h2 className="mt-3 text-3xl font-bold text-blue-950 sm:text-4xl">
-              One workflow, four focused agents, human approval.
+              A transparent path from search to proposal plan.
             </h2>
             <p className="mt-5 text-base leading-7 text-slate-600">
-              GrantPilot separates discovery, eligibility, and drafting so every
-              recommendation can be reviewed before it becomes proposal content.
+              GrantPilot separates profile memory, discovery, eligibility, and
+              proposal drafting so every recommendation can be traced before it
+              becomes content.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {agentSteps.map(([name, description], index) => (
-              <div
-                key={name}
-                className="rounded-xl border border-slate-200 bg-white p-6"
-              >
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-600 text-sm font-bold text-white">
-                  {index + 1}
-                </span>
-                <h3 className="mt-5 text-lg font-bold text-blue-950">{name}</h3>
+
+          <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.78fr]">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-2">
+                {agentSteps.map(([name, description, signal], index) => (
+                  <div
+                    key={name}
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-5"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="grid h-10 w-10 place-items-center rounded-lg bg-blue-600 text-sm font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <span className="rounded-lg bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-700">
+                        {signal}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-lg font-bold text-blue-950">
+                      {name}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
+                <p className="text-sm font-bold text-blue-950">
+                  Human checkpoint
+                </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {description}
+                  Review the evidence, edit generated facts, and approve the
+                  proposal direction before anything moves into a final draft.
                 </p>
               </div>
-            ))}
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-blue-950 p-6 text-white shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
+                Document intelligence
+              </p>
+              <h3 className="mt-3 text-2xl font-bold">
+                Guidelines become a usable action brief.
+              </h3>
+              <div className="mt-6 space-y-3">
+                {[
+                  ["Eligibility", "Registered nonprofit, target districts"],
+                  ["Required evidence", "Documents mapped from grant guidelines"],
+                  ["Key dates", "Deadlines extracted from source materials"],
+                  ["Risk flags", "Missing requirements surfaced for review"],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-lg border border-white/15 bg-white/10 p-4"
+                  >
+                    <p className="text-xs font-bold uppercase text-cyan-100">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-blue-50">
+                      {value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/ai/documents"
+                className="mt-6 inline-flex rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-blue-950 transition hover:bg-cyan-50"
+              >
+                Analyze a document
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -258,31 +242,18 @@ export default function Home() {
       </section>
 
       <section className="bg-blue-950 py-20 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
-              Success metrics
-            </p>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-              See why a grant is worth your team&apos;s time.
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {stories.map((story) => (
-              <figure
-                key={story.name}
-                className="rounded-xl border border-white/15 bg-white/10 p-6"
-              >
-                <blockquote className="text-base leading-7 text-blue-50">
-                  &quot;{story.quote}&quot;
-                </blockquote>
-                <figcaption className="mt-5">
-                  <p className="font-bold">{story.name}</p>
-                  <p className="text-sm text-blue-100">{story.role}</p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
+            Approval-first data
+          </p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-bold sm:text-4xl">
+            Public grant discovery only shows admin-approved opportunities.
+          </h2>
+          <p className="mt-5 max-w-3xl text-sm leading-6 text-blue-50">
+            Funder submissions and seeded grants remain hidden until an admin
+            reviews them. Once approved, they automatically appear on the landing
+            page, Explore page, and grant seeker dashboard.
+          </p>
         </div>
       </section>
 
@@ -336,7 +307,7 @@ export default function Home() {
                 Ready for the next step
               </p>
               <h2 className="mt-3 text-3xl font-bold text-blue-950">
-                Connect the grant domain when you are ready.
+                Review and approve grant data from the admin dashboard.
               </h2>
             </div>
             <Link
