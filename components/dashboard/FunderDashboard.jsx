@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 import { DashboardHeader, StatCard, StatusPill } from "@/components/dashboard/DashboardCards";
 import RoleGate from "@/components/dashboard/RoleGate";
+import { getBackendAuthToken } from "@/lib/auth-bridge";
 
 function approvalTone(status) {
   if (status === "approved") return "green";
@@ -18,16 +19,9 @@ export default function FunderDashboard() {
   const [message, setMessage] = useState("");
 
   const loadMyGrants = useCallback(async () => {
-    const token = localStorage.getItem("grantpilot_auth_token");
-
-    if (!token) {
-      setStatus("error");
-      setMessage("Sign in as a funder to load your grants.");
-      return;
-    }
-
     try {
       setStatus("loading");
+      const token = await getBackendAuthToken();
       const response = await fetch(`${getApiBaseUrl()}/api/my/grants`, {
         headers: { authorization: `Bearer ${token}` },
       });
@@ -80,7 +74,7 @@ export default function FunderDashboard() {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="My grants" value={status === "loading" ? "..." : grants.length} detail="Loaded from MongoDB" />
         <StatCard label="Approved" value={approved} detail="Visible to grant seekers" />
         <StatCard label="Pending review" value={pending} detail="Waiting for admin approval" />

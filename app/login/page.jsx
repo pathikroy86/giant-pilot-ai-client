@@ -13,9 +13,9 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <section className="bg-slate-50 py-16 sm:py-20">
+    <section className="bg-slate-50 py-10 sm:py-20">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <div className="mb-8">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
               Welcome back
@@ -31,11 +31,11 @@ export default function LoginPage() {
         </div>
 
         <aside className="flex flex-col justify-center">
-          <div className="rounded-xl border border-blue-100 bg-blue-950 p-8 text-white shadow-sm">
+          <div className="rounded-xl border border-blue-100 bg-blue-950 p-5 text-white shadow-sm sm:p-8">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
               Workspace access
             </p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight">
+            <h2 className="mt-4 text-2xl font-bold leading-tight sm:text-3xl">
               Your role controls which data and approvals you can manage.
             </h2>
             <div className="mt-8 space-y-4">

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { syncBackendSession } from "@/lib/auth-bridge";
+import { getRedirectFromBrowser } from "@/lib/auth-redirect";
 
 const initialFormData = {
   email: "",
@@ -10,6 +13,7 @@ const initialFormData = {
 };
 
 export default function LoginForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState(initialFormData);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
@@ -25,25 +29,20 @@ export default function LoginForm() {
     setMessage("");
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/login`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const { error } = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not sign you in");
+      if (error) {
+        throw new Error(error.message || "Could not sign you in");
       }
 
-      localStorage.setItem("grantpilot_user", JSON.stringify(data.user));
-      localStorage.setItem("grantpilot_auth_token", data.token);
-      window.dispatchEvent(new Event("grantpilot-auth-changed"));
+      const data = await syncBackendSession();
       setStatus("success");
       setMessage(`Welcome back, ${data.user.name}. Your workspace is ready.`);
+      router.replace(getRedirectFromBrowser());
+      router.refresh();
     } catch (error) {
       setStatus("error");
       setMessage(error.message);

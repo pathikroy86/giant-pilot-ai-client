@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { syncBackendSession } from "@/lib/auth-bridge";
+import { getRedirectFromBrowser } from "@/lib/auth-redirect";
 
 const initialFormData = {
   name: "",
@@ -27,6 +30,7 @@ const roleOptions = [
 ];
 
 export default function SignupForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState(initialFormData);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
@@ -42,26 +46,34 @@ export default function SignupForm() {
     setMessage("");
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/users`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const { error } = await authClient.signUp.email({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        plan: formData.role === "funder" ? "funder_free" : "applicant_free",
+        organizationName: formData.organizationName,
+        organizationType: formData.organizationType,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not create your account");
+      if (error) {
+        throw new Error(error.message || "Could not create your account");
       }
 
+      await syncBackendSession();
       setFormData(initialFormData);
-      localStorage.setItem("grantpilot_user", JSON.stringify(data.user));
-      localStorage.setItem("grantpilot_auth_token", data.token);
-      window.dispatchEvent(new Event("grantpilot-auth-changed"));
       setStatus("success");
-      setMessage("Account created. Your role-based workspace is ready.");
+      setMessage(
+        formData.role === "funder"
+          ? "Funder account created. Admin approval is required before your funder workspace opens."
+          : "Account created. Your role-based workspace is ready.",
+      );
+      router.replace(
+        getRedirectFromBrowser(
+          formData.role === "funder" ? "/dashboard/funder" : "/dashboard",
+        ),
+      );
+      router.refresh();
     } catch (error) {
       setStatus("error");
       setMessage(error.message);

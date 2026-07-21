@@ -5,15 +5,11 @@ import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 import { DashboardHeader, StatCard, StatusPill } from "@/components/dashboard/DashboardCards";
 import RoleGate from "@/components/dashboard/RoleGate";
-
-function isDeadlineSoon(deadline) {
-  const diffMs = new Date(`${deadline}T00:00:00`).getTime() - Date.now();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  return diffDays >= 0 && diffDays <= 45;
-}
+import { getBackendAuthToken } from "@/lib/auth-bridge";
 
 export default function GrantSeekerDashboard() {
   const [grants, setGrants] = useState([]);
+  const [savedGrants, setSavedGrants] = useState([]);
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
@@ -22,6 +18,17 @@ export default function GrantSeekerDashboard() {
         const response = await fetch(`${getApiBaseUrl()}/api/grants`);
         const data = await response.json();
         setGrants(response.ok ? data : []);
+        try {
+          const token = await getBackendAuthToken();
+          const savedResponse = await fetch(`${getApiBaseUrl()}/api/my/saved-grants`, {
+            headers: { authorization: `Bearer ${token}` },
+          });
+          const savedData = await savedResponse.json();
+
+          setSavedGrants(savedResponse.ok ? savedData : []);
+        } catch {
+          setSavedGrants([]);
+        }
         setStatus("success");
       } catch {
         setStatus("error");
@@ -34,10 +41,6 @@ export default function GrantSeekerDashboard() {
   const recommendedGrants = useMemo(() => grants.slice(0, 4), [grants]);
   const highMatchCount = useMemo(
     () => grants.filter((grant) => Number(grant.match) >= 85).length,
-    [grants]
-  );
-  const deadlineSoonCount = useMemo(
-    () => grants.filter((grant) => isDeadlineSoon(grant.deadline)).length,
     [grants]
   );
   const categoryCount = useMemo(
@@ -61,15 +64,15 @@ export default function GrantSeekerDashboard() {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Approved grants" value={status === "loading" ? "..." : grants.length} detail="Visible after admin approval" />
         <StatCard label="Strong matches" value={highMatchCount} detail="Approved grants at 85% or higher" />
-        <StatCard label="Deadline soon" value={deadlineSoonCount} detail="Approved grants due within 45 days" />
+        <StatCard label="Saved grants" value={savedGrants.length} detail="Saved from grant details" />
         <StatCard label="Categories" value={categoryCount} detail="Funding areas available" />
       </div>
 
-      <section className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
+      <section className="mt-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-blue-950">Recommended approved grants</h2>
             <p className="mt-2 text-sm text-slate-500">
@@ -81,7 +84,7 @@ export default function GrantSeekerDashboard() {
 
         <div className="mt-6 space-y-4">
           {recommendedGrants.map((grant) => (
-            <div key={grant._id || grant.slug} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div key={grant._id || grant.slug} className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase text-cyan-600">{grant.category}</p>
@@ -105,6 +108,46 @@ export default function GrantSeekerDashboard() {
             </div>
           ) : null}
         </div>
+      </section>
+
+      <section className="mt-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-blue-950">Saved grants</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Grants you saved from the details page with your application
+              description.
+            </p>
+          </div>
+          <StatusPill tone="green">{savedGrants.length} saved</StatusPill>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {savedGrants.map((savedItem) => (
+            <Link
+              key={savedItem._id}
+              href={`/grants/${savedItem.grant.slug}`}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-200 hover:bg-white"
+            >
+              <p className="text-xs font-bold uppercase text-cyan-600">
+                {savedItem.grant.category}
+              </p>
+              <h3 className="mt-2 text-lg font-bold text-blue-950">
+                {savedItem.grant.title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {savedItem.notes || savedItem.grant.summary}
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        {status === "success" && savedGrants.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+            Saved grants will appear here after you save them from a grant
+            details page.
+          </div>
+        ) : null}
       </section>
     </RoleGate>
   );

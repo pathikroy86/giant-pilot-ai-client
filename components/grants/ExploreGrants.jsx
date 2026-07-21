@@ -80,7 +80,7 @@ export default function ExploreGrants() {
   return (
     <div className="space-y-8">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr]">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr]">
           <div>
             <label htmlFor="search" className="text-xs font-bold uppercase text-slate-500">
               Search
@@ -149,7 +149,7 @@ export default function ExploreGrants() {
         <p className="text-sm font-semibold text-slate-600">
           Showing {filteredGrants.length} of {grants.length} opportunities
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {["Open", "High match", "Deadline soon"].map((label) => (
             <span
               key={label}
@@ -162,7 +162,7 @@ export default function ExploreGrants() {
       </div>
 
       {status === "loading" ? (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}
@@ -184,7 +184,7 @@ export default function ExploreGrants() {
       ) : null}
 
       {status === "success" ? (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {filteredGrants.map((grant) => (
             <article
               key={grant._id || grant.slug}
@@ -234,7 +234,7 @@ export default function ExploreGrants() {
       ) : null}
 
       {status === "success" && filteredGrants.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center sm:p-10">
           <h2 className="text-xl font-bold text-blue-950">No grants found</h2>
           <p className="mt-2 text-sm text-slate-500">
             Try a different search term, category, or funding range.
@@ -242,7 +242,7 @@ export default function ExploreGrants() {
         </div>
       ) : null}
 
-      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
         <button className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
           Previous
         </button>

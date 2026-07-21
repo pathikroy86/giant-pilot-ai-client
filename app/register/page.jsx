@@ -13,13 +13,13 @@ export const metadata = {
 
 export default function RegisterPage() {
   return (
-    <section className="bg-slate-50 py-16 sm:py-20">
+    <section className="bg-slate-50 py-10 sm:py-20">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <div className="flex flex-col justify-center">
           <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
             Join GrantPilot
           </p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight text-blue-950 sm:text-5xl">
+          <h1 className="mt-4 text-3xl font-bold leading-tight text-blue-950 sm:text-5xl">
             Create your grant workspace.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-blue-950">Sign up</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">

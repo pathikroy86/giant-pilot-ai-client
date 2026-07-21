@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import { getBackendAuthToken } from "@/lib/auth-bridge";
 
 function formatDeadline(deadline) {
   if (!deadline) return "Not specified";
@@ -29,6 +30,12 @@ export default function GrantDetails() {
   const [approvedGrants, setApprovedGrants] = useState([]);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saveStatus, setSaveStatus] = useState("idle");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [agentStatus, setAgentStatus] = useState("idle");
+  const [agentMessage, setAgentMessage] = useState("");
+  const [eligibilityReport, setEligibilityReport] = useState(null);
 
   useEffect(() => {
     const loadGrant = async () => {
@@ -69,11 +76,71 @@ export default function GrantDetails() {
       .slice(0, 3);
   }, [approvedGrants, grant]);
 
+  const saveGrant = async () => {
+    setSaveStatus("loading");
+    setSaveMessage("");
+
+    try {
+      const token = await getBackendAuthToken();
+      const response = await fetch(`${getApiBaseUrl()}/api/grants/${slug}/save`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not save this grant");
+      }
+
+      setSaveStatus("success");
+      setSaveMessage("Grant saved with your application description.");
+    } catch (saveError) {
+      setSaveStatus("error");
+      setSaveMessage(saveError.message);
+    }
+  };
+
+  const runEligibilityAgent = async () => {
+    setAgentStatus("loading");
+    setAgentMessage("");
+    setEligibilityReport(null);
+
+    try {
+      const token = await getBackendAuthToken();
+      const response = await fetch(
+        `${getApiBaseUrl()}/api/grants/${slug}/eligibility`,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${token}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ notes }),
+        },
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not run eligibility agent");
+      }
+
+      setEligibilityReport(data.report);
+      setAgentStatus("success");
+    } catch (agentError) {
+      setAgentStatus("error");
+      setAgentMessage(agentError.message);
+    }
+  };
+
   if (status === "loading") {
     return (
-      <section className="bg-slate-50 py-12 sm:py-16">
+      <section className="bg-slate-50 py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="h-96 animate-pulse rounded-xl border border-slate-200 bg-white" />
+          <div className="h-72 animate-pulse rounded-xl border border-slate-200 bg-white sm:h-96" />
         </div>
       </section>
     );
@@ -81,10 +148,10 @@ export default function GrantDetails() {
 
   if (status === "error") {
     return (
-      <section className="bg-slate-50 py-12 sm:py-16">
+      <section className="bg-slate-50 py-10 sm:py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="rounded-xl border border-red-100 bg-red-50 p-8">
-            <h1 className="text-3xl font-bold text-blue-950">Grant unavailable</h1>
+          <div className="rounded-xl border border-red-100 bg-red-50 p-5 sm:p-8">
+            <h1 className="text-2xl font-bold text-blue-950 sm:text-3xl">Grant unavailable</h1>
             <p className="mt-3 text-sm leading-6 text-red-700">{error}</p>
             <Link
               href="/explore"
@@ -99,7 +166,7 @@ export default function GrantDetails() {
   }
 
   return (
-    <section className="bg-slate-50 py-12 sm:py-16">
+    <section className="bg-slate-50 py-10 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href="/explore"
@@ -109,13 +176,13 @@ export default function GrantDetails() {
         </Link>
 
         <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="bg-blue-950 p-8 text-white sm:p-10">
+          <div className="bg-blue-950 p-5 text-white sm:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
                   {grant.category}
                 </p>
-                <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-tight sm:text-5xl">
+                <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
                   {grant.title}
                 </h1>
                 <p className="mt-4 max-w-3xl text-base leading-7 text-blue-50">
@@ -125,7 +192,7 @@ export default function GrantDetails() {
 
               <div className="rounded-xl border border-white/15 bg-white/10 p-5 lg:min-w-60">
                 <p className="text-sm font-semibold text-blue-100">Profile match</p>
-                <p className="mt-2 text-4xl font-bold">{grant.match}%</p>
+                <p className="mt-2 text-3xl font-bold sm:text-4xl">{grant.match}%</p>
                 <p className="mt-2 text-sm text-blue-100">
                   Approved for public discovery
                 </p>
@@ -133,17 +200,17 @@ export default function GrantDetails() {
             </div>
           </div>
 
-          <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-6 p-4 sm:p-8 lg:grid-cols-[1fr_360px]">
             <div className="space-y-8">
               <section>
-                <h2 className="text-2xl font-bold text-blue-950">Overview</h2>
+                <h2 className="text-xl font-bold text-blue-950 sm:text-2xl">Overview</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {grant.summary}
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-blue-950">
+                <h2 className="text-xl font-bold text-blue-950 sm:text-2xl">
                   Eligibility requirements
                 </h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -161,7 +228,7 @@ export default function GrantDetails() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-blue-950">
+                <h2 className="text-xl font-bold text-blue-950 sm:text-2xl">
                   Evidence and review signals
                 </h2>
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
@@ -213,21 +280,122 @@ export default function GrantDetails() {
                 </div>
               </div>
 
+              <div className="rounded-xl border border-slate-200 bg-white p-5">
+                <label
+                  htmlFor="application-description"
+                  className="text-sm font-bold text-blue-950"
+                >
+                  Application description
+                </label>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  Add your project, organization, or evidence notes. These notes
+                  are saved with the grant and used by the eligibility agent.
+                </p>
+                <textarea
+                  id="application-description"
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={5}
+                  className="mt-4 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  placeholder="Example: We are a nonprofit running after-school STEM programs for low-income students in Ohio..."
+                />
+              </div>
+
               <button
                 type="button"
+                onClick={runEligibilityAgent}
+                disabled={agentStatus === "loading"}
                 className="w-full rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700"
               >
-                Run eligibility agent
+                {agentStatus === "loading"
+                  ? "Running eligibility..."
+                  : "Run eligibility agent"}
               </button>
               <button
                 type="button"
+                onClick={saveGrant}
+                disabled={saveStatus === "loading"}
                 className="w-full rounded-lg border border-blue-200 bg-white px-5 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-50"
               >
-                Save grant
+                {saveStatus === "loading" ? "Saving..." : "Save grant"}
               </button>
+
+              {saveMessage ? (
+                <p
+                  className={`rounded-lg px-4 py-3 text-sm font-semibold ${
+                    saveStatus === "success"
+                      ? "bg-cyan-50 text-cyan-800"
+                      : "bg-amber-50 text-amber-800"
+                  }`}
+                >
+                  {saveMessage}
+                </p>
+              ) : null}
+
+              {agentMessage ? (
+                <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                  {agentMessage}
+                </p>
+              ) : null}
             </aside>
           </div>
         </div>
+
+        {eligibilityReport ? (
+          <section className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
+                  Eligibility agent
+                </p>
+                <h2 className="mt-2 text-xl font-bold text-blue-950 sm:text-2xl">
+                  {eligibilityReport.readiness}
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                  {eligibilityReport.summary}
+                </p>
+              </div>
+              <div className="rounded-lg bg-blue-50 px-5 py-4 text-center">
+                <p className="text-3xl font-bold text-blue-700">
+                  {eligibilityReport.eligibilityScore}
+                </p>
+                <p className="text-xs font-bold uppercase text-blue-500">
+                  eligibility score
+                </p>
+              </div>
+            </div>
+
+            {eligibilityReport.providerStatus === "rules-preview" ? (
+              <p className="mt-5 rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                Add a Gemini API key in the backend .env file for full LLM
+                reasoning. This saved report uses the local readiness preview.
+              </p>
+            ) : null}
+
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                ["Strengths", eligibilityReport.strengths],
+                ["Gaps", eligibilityReport.gaps],
+                ["Documents", eligibilityReport.requiredDocuments],
+                ["Next steps", eligibilityReport.nextSteps],
+              ].map(([title, items]) => (
+                <div
+                  key={title}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <h3 className="text-sm font-bold uppercase text-blue-950">
+                    {title}
+                  </h3>
+                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+                    {(items || []).map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-8">
           <div className="flex items-end justify-between gap-4">
@@ -235,13 +403,13 @@ export default function GrantDetails() {
               <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
                 Related grants
               </p>
-              <h2 className="mt-2 text-2xl font-bold text-blue-950">
+              <h2 className="mt-2 text-xl font-bold text-blue-950 sm:text-2xl">
                 Other approved opportunities in {grant.category}
               </h2>
             </div>
           </div>
 
-          <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {relatedGrants.map((relatedGrant) => (
               <Link
                 key={relatedGrant._id || relatedGrant.slug}
@@ -262,7 +430,7 @@ export default function GrantDetails() {
           </div>
 
           {relatedGrants.length === 0 ? (
-            <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+            <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 sm:p-8">
               No related approved grants are available yet.
             </div>
           ) : null}

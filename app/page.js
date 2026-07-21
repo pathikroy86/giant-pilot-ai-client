@@ -35,27 +35,6 @@ const capabilities = [
   "Exportable briefs for team handoff",
 ];
 
-const insights = [
-  "How to read a grant deadline like a project manager",
-  "What funders mean by measurable community resilience",
-  "A practical evidence checklist for first-time applicants",
-];
-
-const faqs = [
-  [
-    "Why do grants need admin approval?",
-    "Only approved grants are returned by the public API, which keeps low-quality or incomplete listings out of the UI.",
-  ],
-  [
-    "Does the AI submit grants automatically?",
-    "No. GrantPilot keeps a human approval checkpoint before proposal export or submission.",
-  ],
-  [
-    "What files can the document agent read?",
-    "The planned workflow supports PDF, DOCX, and TXT guideline uploads up to 15 MB.",
-  ],
-];
-
 export default function Home() {
   return (
     <div className="bg-slate-50">
@@ -69,15 +48,15 @@ export default function Home() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-blue-950/45" />
-        <div className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl items-center px-4 py-16 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center px-4 py-12 sm:min-h-[calc(100vh-5rem)] sm:px-6 sm:py-16 lg:px-8">
           <div className="max-w-3xl py-10 text-white">
             <p className="mb-5 inline-flex rounded-lg border border-cyan-300/40 bg-white/10 px-3 py-1 text-sm font-semibold text-cyan-100">
               AI funding workspace
             </p>
-            <h1 className="max-w-4xl text-5xl font-bold leading-tight sm:text-6xl lg:text-7xl">
+            <h1 className="max-w-4xl text-4xl font-bold leading-tight sm:text-5xl lg:text-7xl">
               Turn funding opportunities into winning action plans.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-50 sm:text-xl">
+            <p className="mt-6 max-w-2xl text-base leading-7 text-blue-50 sm:text-xl sm:leading-8">
               Discover, assess, analyze, and draft in one transparent agent
               workflow built for nonprofits, schools, and mission-driven teams.
             </p>
@@ -101,7 +80,7 @@ export default function Home() {
 
       <PublicGrantStats />
 
-      <section className="bg-white py-20">
+      <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -124,7 +103,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="bg-slate-50 py-20">
+      <section id="how-it-works" className="bg-slate-50 py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
@@ -141,7 +120,7 @@ export default function Home() {
           </div>
 
           <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.78fr]">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <div className="grid gap-4 md:grid-cols-2">
                 {agentSteps.map(([name, description, signal], index) => (
                   <div
@@ -177,7 +156,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-blue-950 p-6 text-white shadow-sm">
+            <div className="rounded-xl border border-slate-200 bg-blue-950 p-4 text-white shadow-sm sm:p-6">
               <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
                 Document intelligence
               </p>
@@ -215,7 +194,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white py-20">
+      <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
@@ -241,7 +220,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-blue-950 py-20 text-white">
+      <section className="bg-blue-950 py-14 text-white sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold uppercase tracking-wide text-cyan-200">
             Approval-first data
@@ -257,61 +236,44 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="insights" className="bg-slate-50 py-20">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <div>
+      <section id="insights" className="bg-slate-50 py-14 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:flex-row lg:items-center">
+            <div className="max-w-3xl">
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
-              Expert insights
+              Grant intelligence
             </p>
             <h2 className="mt-3 text-3xl font-bold text-blue-950 sm:text-4xl">
-              Learn the habits of stronger grant applicants.
+              Explore live charts and applicant guidance.
             </h2>
-            <div className="mt-8 space-y-3">
-              {insights.map((insight) => (
-                <Link
-                  key={insight}
-                  href="/blog"
-                  className="block rounded-xl border border-slate-200 bg-white p-5 font-semibold text-slate-800 transition hover:border-blue-200 hover:text-blue-700"
-                >
-                  {insight}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
-              FAQ
+            <p className="mt-4 text-base leading-7 text-slate-600">
+              View category trends, funding signals, deadline urgency, and
+              expert grant-readiness notes on the dedicated insights page.
             </p>
-            <div className="mt-6 space-y-4">
-              {faqs.map(([question, answer]) => (
-                <div
-                  key={question}
-                  className="rounded-xl border border-slate-200 bg-white p-6"
-                >
-                  <h3 className="font-bold text-blue-950">{question}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {answer}
-                  </p>
-                </div>
-              ))}
-            </div>
+          </div>
+            <Link
+              href="/insights"
+              className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700"
+            >
+              Open insights
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-20">
+      <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-slate-200 bg-slate-50 p-8 md:flex-row md:items-center">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-8 md:flex-row md:items-center">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
                 Ready for the next step
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-blue-950">
+              <h2 className="mt-3 text-2xl font-bold text-blue-950 sm:text-3xl">
                 Review and approve grant data from the admin dashboard.
               </h2>
             </div>
             <Link
-              href="/register"
+              href="/dashboard"
               className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700"
             >
               Get started

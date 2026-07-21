@@ -7,14 +7,14 @@ export const metadata = {
 
 export default function ExplorePage() {
   return (
-    <section className="bg-slate-50 py-12 sm:py-16">
+    <section className="bg-slate-50 py-10 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
               Explore grants
             </p>
-            <h1 className="mt-3 text-4xl font-bold text-blue-950 sm:text-5xl">
+            <h1 className="mt-3 text-3xl font-bold leading-tight text-blue-950 sm:text-5xl">
               Find the right opportunity faster.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">

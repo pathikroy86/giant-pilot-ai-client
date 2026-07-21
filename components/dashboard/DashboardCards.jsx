@@ -1,8 +1,8 @@
 export function StatCard({ label, value, detail }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <p className="text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-bold text-blue-950">{value}</p>
+      <p className="mt-3 text-2xl font-bold text-blue-950 sm:text-3xl">{value}</p>
       <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
     </div>
   );
@@ -11,11 +11,11 @@ export function StatCard({ label, value, detail }) {
 export function DashboardHeader({ eyebrow, title, description, action }) {
   return (
     <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
           {eyebrow}
         </p>
-        <h1 className="mt-3 text-4xl font-bold text-blue-950 sm:text-5xl">
+        <h1 className="mt-3 text-3xl font-bold leading-tight text-blue-950 sm:text-4xl lg:text-5xl">
           {title}
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
