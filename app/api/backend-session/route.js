@@ -36,6 +36,37 @@ function serializeUser(user) {
   };
 }
 
+function base64UrlEncode(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function createBackendJwt(user) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is required");
+  }
+
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const expiresAt = issuedAt + 60 * 60 * 24 * 7;
+  const header = {
+    alg: "HS256",
+    typ: "JWT",
+  };
+  const payload = {
+    sub: user._id?.toString(),
+    email: user.email,
+    role: user.role,
+    iat: issuedAt,
+    exp: expiresAt,
+  };
+  const signedValue = `${base64UrlEncode(header)}.${base64UrlEncode(payload)}`;
+  const signature = crypto
+    .createHmac("sha256", process.env.JWT_SECRET)
+    .update(signedValue)
+    .digest("base64url");
+
+  return `${signedValue}.${signature}`;
+}
+
 export async function POST() {
   try {
     const betterAuthSession = await auth.api.getSession({
@@ -52,7 +83,6 @@ export async function POST() {
 
     const db = client.db(process.env.AUTH_DB_NAME || "grantpilot_ai");
     const usersCollection = db.collection("users");
-    const sessionsCollection = db.collection("sessions");
     const normalizedEmail = betterAuthUser.email.trim().toLowerCase();
     const existingUser = await usersCollection.findOne({
       email: normalizedEmail,
@@ -116,15 +146,7 @@ export async function POST() {
       };
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
-
-    await sessionsCollection.insertOne({
-      token,
-      userId: user._id,
-      authProvider: "better-auth",
-      betterAuthSessionId: betterAuthSession.session?.id,
-      createdAt: new Date(),
-    });
+    const token = createBackendJwt(user);
 
     return Response.json({
       token,

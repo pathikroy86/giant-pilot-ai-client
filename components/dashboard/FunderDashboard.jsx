@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 import {
   DashboardHeader,
@@ -746,11 +747,18 @@ export default function FunderDashboard() {
                     <p className="text-xs font-bold uppercase text-slate-500">
                       Public link
                     </p>
-                    <p className="mt-1 font-semibold text-slate-800">
-                      {currentStatus === "approved"
-                        ? `/grants/${grant.slug}`
-                        : "Hidden until approved"}
-                    </p>
+                    {currentStatus === "approved" ? (
+                      <Link
+                        href={`/grants/${grant.slug}`}
+                        className="mt-1 inline-flex break-all font-semibold text-blue-700 transition hover:text-blue-900"
+                      >
+                        View public grant
+                      </Link>
+                    ) : (
+                      <p className="mt-1 font-semibold text-slate-800">
+                        Hidden until approved
+                      </p>
+                    )}
                   </div>
                 </div>
 
