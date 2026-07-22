@@ -18,71 +18,26 @@ import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 
 const colors = ["#2563eb", "#0891b2", "#10b981", "#f59e0b", "#64748b", "#7c3aed"];
 
-function getDeadlineBucket(deadline) {
-  if (!deadline) return "No deadline";
-
-  const days = Math.ceil(
-    (new Date(`${deadline}T00:00:00`).getTime() - Date.now()) /
-      (1000 * 60 * 60 * 24),
-  );
-
-  if (days < 0) return "Past";
-  if (days <= 30) return "0-30 days";
-  if (days <= 60) return "31-60 days";
-  return "60+ days";
-}
-
-function summarizeByCategory(grants) {
-  const grouped = new Map();
-
-  grants.forEach((grant) => {
-    const category = grant.category || "Other";
-    const current = grouped.get(category) || {
-      category,
-      grants: 0,
-      totalFunding: 0,
-      averageMatch: 0,
-    };
-
-    current.grants += 1;
-    current.totalFunding += Number(grant.maxAmount || 0);
-    current.averageMatch += Number(grant.match || 0);
-    grouped.set(category, current);
-  });
-
-  return Array.from(grouped.values())
-    .map((item) => ({
-      ...item,
-      averageMatch: item.grants ? Math.round(item.averageMatch / item.grants) : 0,
-      fundingLabel: `$${Math.round(item.totalFunding / 1000)}k`,
-    }))
-    .sort((a, b) => b.grants - a.grants)
-    .slice(0, 6);
-}
-
-function summarizeDeadlines(grants) {
-  const buckets = ["0-30 days", "31-60 days", "60+ days", "Past", "No deadline"];
-
-  return buckets
-    .map((bucket) => ({
-      name: bucket,
-      value: grants.filter((grant) => getDeadlineBucket(grant.deadline) === bucket).length,
-    }))
-    .filter((item) => item.value > 0);
+function formatFunding(value) {
+  return `$${Math.round(Number(value || 0) / 1000)}k`;
 }
 
 export default function GrantInsightsCharts() {
-  const [grants, setGrants] = useState([]);
+  const [insights, setInsights] = useState(null);
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     const loadInsights = async () => {
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/grants`);
+        const response = await fetch(`${getApiBaseUrl()}/api/insights`);
         const data = await response.json();
 
-        setGrants(response.ok ? data : []);
-        setStatus(response.ok ? "success" : "error");
+        if (!response.ok) {
+          throw new Error(data.message || "Could not load insights");
+        }
+
+        setInsights(data);
+        setStatus("success");
       } catch {
         setStatus("error");
       }
@@ -91,20 +46,18 @@ export default function GrantInsightsCharts() {
     loadInsights();
   }, []);
 
-  const categoryData = useMemo(() => summarizeByCategory(grants), [grants]);
-  const deadlineData = useMemo(() => summarizeDeadlines(grants), [grants]);
-  const totalFunding = useMemo(
-    () => grants.reduce((sum, grant) => sum + Number(grant.maxAmount || 0), 0),
-    [grants],
+  const categoryData = insights?.categoryData || [];
+  const fundingData = insights?.fundingData || categoryData;
+  const deadlineData = insights?.deadlineData || [];
+  const summary = insights?.summary || {
+    approvedGrants: 0,
+    totalFunding: 0,
+    averageMatch: 0,
+  };
+  const hasChartData = useMemo(
+    () => categoryData.length > 0 || deadlineData.length > 0,
+    [categoryData.length, deadlineData.length],
   );
-  const averageMatch = useMemo(() => {
-    if (!grants.length) return 0;
-
-    return Math.round(
-      grants.reduce((sum, grant) => sum + Number(grant.match || 0), 0) /
-        grants.length,
-    );
-  }, [grants]);
 
   if (status === "loading") {
     return (
@@ -115,7 +68,7 @@ export default function GrantInsightsCharts() {
     );
   }
 
-  if (status === "error" || grants.length === 0) {
+  if (status === "error" || !hasChartData) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
         Charts will appear after approved grants are available from the database.
@@ -130,14 +83,16 @@ export default function GrantInsightsCharts() {
           <p className="text-xs font-bold uppercase text-slate-500">
             Approved grants
           </p>
-          <p className="mt-2 text-3xl font-bold text-blue-950">{grants.length}</p>
+          <p className="mt-2 text-3xl font-bold text-blue-950">
+            {summary.approvedGrants}
+          </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-bold uppercase text-slate-500">
             Max funding pool
           </p>
           <p className="mt-2 text-3xl font-bold text-blue-950">
-            ${Math.round(totalFunding / 1000)}k
+            {formatFunding(summary.totalFunding)}
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -145,7 +100,7 @@ export default function GrantInsightsCharts() {
             Average match
           </p>
           <p className="mt-2 text-3xl font-bold text-blue-950">
-            {averageMatch}%
+            {summary.averageMatch}%
           </p>
         </div>
       </div>
@@ -233,7 +188,7 @@ export default function GrantInsightsCharts() {
         </h3>
         <div className="mt-5 h-80 min-w-0">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryData} margin={{ top: 8, right: 10, left: -20, bottom: 54 }}>
+            <BarChart data={fundingData} margin={{ top: 8, right: 10, left: -20, bottom: 54 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
                 dataKey="category"
@@ -246,7 +201,7 @@ export default function GrantInsightsCharts() {
               <YAxis yAxisId="right" orientation="right" tick={{ fill: "#64748b", fontSize: 12 }} />
               <Tooltip
                 formatter={(value, name) => {
-                  if (name === "totalFunding") return [`$${Math.round(value / 1000)}k`, "Max funding"];
+                  if (name === "totalFunding") return [formatFunding(value), "Max funding"];
                   return [`${value}%`, "Average match"];
                 }}
                 contentStyle={{
@@ -260,6 +215,47 @@ export default function GrantInsightsCharts() {
               <Bar yAxisId="right" dataKey="averageMatch" fill="#10b981" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
+          Database signals
+        </p>
+        <h3 className="mt-2 text-xl font-bold text-blue-950">
+          What the approved grants are showing right now
+        </h3>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {[
+            [
+              "Largest category",
+              categoryData[0]
+                ? `${categoryData[0].category} with ${categoryData[0].grants} grants`
+                : "No category data yet",
+            ],
+            [
+              "Most urgent window",
+              deadlineData[0]
+                ? `${deadlineData[0].name} has ${deadlineData[0].value} grants`
+                : "No deadline data yet",
+            ],
+            [
+              "Funding coverage",
+              `${summary.categories || 0} categories total ${formatFunding(summary.totalFunding)}`,
+            ],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+            >
+              <p className="text-xs font-bold uppercase text-slate-500">
+                {label}
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">
+                {value}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import { getBackendAuthToken } from "@/lib/auth-bridge";
 
 const defaultForm = {
   interests: "environment, education, technology",
@@ -23,11 +24,11 @@ export default function AIRecommendations() {
   };
 
   const generateRecommendations = async () => {
-    const token = localStorage.getItem("grantpilot_auth_token");
     setStatus("loading");
     setMessage("");
 
     try {
+      const token = await getBackendAuthToken();
       const response = await fetch(`${getApiBaseUrl()}/api/ai/recommend`, {
         method: "POST",
         headers: {

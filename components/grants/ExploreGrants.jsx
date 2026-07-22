@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import Pagination from "@/components/Pagination";
+import { usePagination } from "@/lib/use-pagination";
 
 const fundingRanges = ["Any", "Under $50k", "$50k-$100k", "$100k+"];
 const sortOptions = ["Best match", "Deadline", "Funding"];
@@ -76,6 +78,7 @@ export default function ExploreGrants() {
         return b.match - a.match;
       });
   }, [category, fundingRange, grants, search, sortBy]);
+  const grantsPagination = usePagination(filteredGrants, 6);
 
   return (
     <div className="space-y-8">
@@ -162,8 +165,8 @@ export default function ExploreGrants() {
       </div>
 
       {status === "loading" ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, index) => (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
               className="min-h-80 animate-pulse rounded-xl border border-slate-200 bg-white p-5"
@@ -184,8 +187,8 @@ export default function ExploreGrants() {
       ) : null}
 
       {status === "success" ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {filteredGrants.map((grant) => (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {grantsPagination.items.map((grant) => (
             <article
               key={grant._id || grant.slug}
               className="flex min-h-80 flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
@@ -233,6 +236,17 @@ export default function ExploreGrants() {
         </div>
       ) : null}
 
+      {status === "success" && filteredGrants.length > 0 ? (
+        <Pagination
+          page={grantsPagination.page}
+          totalPages={grantsPagination.totalPages}
+          totalItems={grantsPagination.totalItems}
+          pageSize={grantsPagination.pageSize}
+          label="opportunities"
+          onPageChange={grantsPagination.setPage}
+        />
+      ) : null}
+
       {status === "success" && filteredGrants.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center sm:p-10">
           <h2 className="text-xl font-bold text-blue-950">No grants found</h2>
@@ -242,22 +256,6 @@ export default function ExploreGrants() {
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-        <button className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
-          Previous
-        </button>
-        <div className="flex gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-600 text-sm font-bold text-white">
-            1
-          </span>
-          <span className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-sm font-bold text-slate-600">
-            2
-          </span>
-        </div>
-        <button className="rounded-lg border border-blue-200 px-4 py-2 text-sm font-bold text-blue-700">
-          Next
-        </button>
-      </div>
     </div>
   );
 }

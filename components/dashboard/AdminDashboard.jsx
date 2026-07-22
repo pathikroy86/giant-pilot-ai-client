@@ -5,6 +5,8 @@ import { getApiBaseUrl } from "@/lib/actions/api/base-url";
 import { DashboardHeader, StatCard, StatusPill } from "@/components/dashboard/DashboardCards";
 import RoleGate from "@/components/dashboard/RoleGate";
 import { getBackendAuthToken } from "@/lib/auth-bridge";
+import Pagination from "@/components/Pagination";
+import { usePagination } from "@/lib/use-pagination";
 
 function approvalTone(status) {
   if (status === "approved") return "green";
@@ -187,6 +189,8 @@ export default function AdminDashboard() {
       (funder) => (funder.funderApprovalStatus || "pending") === "pending"
     );
   }, [funders]);
+  const fundersPagination = usePagination(funders, 6);
+  const grantsPagination = usePagination(grants, 6);
 
   const selectedGrant = useMemo(() => {
     return grants.find((grant) => grant._id === selectedGrantId) || null;
@@ -234,7 +238,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          {funders.map((funder) => {
+          {fundersPagination.items.map((funder) => {
             const currentStatus = funder.funderApprovalStatus || "pending";
 
             return (
@@ -288,6 +292,17 @@ export default function AdminDashboard() {
           })}
         </div>
 
+        {funders.length > 0 ? (
+          <Pagination
+            page={fundersPagination.page}
+            totalPages={fundersPagination.totalPages}
+            totalItems={fundersPagination.totalItems}
+            pageSize={fundersPagination.pageSize}
+            label="funders"
+            onPageChange={fundersPagination.setPage}
+          />
+        ) : null}
+
         {status === "success" && funders.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
             No funder registrations are waiting in the database yet.
@@ -319,7 +334,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 bg-white">
-              {grants.map((grant) => {
+              {grantsPagination.items.map((grant) => {
                 const currentStatus = grant.approvalStatus || "pending";
                 const isSelected = selectedGrant?._id === grant._id;
 
@@ -365,7 +380,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-6 space-y-4 md:hidden">
-          {grants.map((grant) => {
+          {grantsPagination.items.map((grant) => {
             const currentStatus = grant.approvalStatus || "pending";
 
             return (
@@ -409,6 +424,17 @@ export default function AdminDashboard() {
             );
           })}
         </div>
+
+        {grants.length > 0 ? (
+          <Pagination
+            page={grantsPagination.page}
+            totalPages={grantsPagination.totalPages}
+            totalItems={grantsPagination.totalItems}
+            pageSize={grantsPagination.pageSize}
+            label="grants"
+            onPageChange={grantsPagination.setPage}
+          />
+        ) : null}
 
         {status === "success" && grants.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">

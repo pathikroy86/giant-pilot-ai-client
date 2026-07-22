@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getApiBaseUrl } from "@/lib/actions/api/base-url";
+import { getBackendAuthToken } from "@/lib/auth-bridge";
 
 const openingPrompts = [
   "Which approved grants should I review first?",
@@ -26,7 +27,6 @@ export default function AIChatAssistant() {
 
   const sendMessage = async (content = input) => {
     const trimmed = content.trim();
-    const token = localStorage.getItem("grantpilot_auth_token");
 
     if (!trimmed) return;
 
@@ -36,6 +36,7 @@ export default function AIChatAssistant() {
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
 
     try {
+      const token = await getBackendAuthToken();
       const response = await fetch(`${getApiBaseUrl()}/api/ai/chat`, {
         method: "POST",
         headers: {

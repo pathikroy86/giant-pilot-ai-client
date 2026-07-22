@@ -261,26 +261,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white py-14 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-8 md:flex-row md:items-center">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-cyan-600">
-                Ready for the next step
-              </p>
-              <h2 className="mt-3 text-2xl font-bold text-blue-950 sm:text-3xl">
-                Review and approve grant data from the admin dashboard.
-              </h2>
-            </div>
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700"
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

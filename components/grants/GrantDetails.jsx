@@ -24,6 +24,14 @@ function formatCurrency(value) {
   }).format(value || 0);
 }
 
+const initialApplicationForm = {
+  projectTitle: "",
+  requestedAmount: "",
+  proposalSummary: "",
+  evidenceNotes: "",
+  contactEmail: "",
+};
+
 export default function GrantDetails() {
   const { slug } = useParams();
   const [grant, setGrant] = useState(null);
@@ -36,6 +44,9 @@ export default function GrantDetails() {
   const [agentStatus, setAgentStatus] = useState("idle");
   const [agentMessage, setAgentMessage] = useState("");
   const [eligibilityReport, setEligibilityReport] = useState(null);
+  const [applicationForm, setApplicationForm] = useState(initialApplicationForm);
+  const [applicationStatus, setApplicationStatus] = useState("idle");
+  const [applicationMessage, setApplicationMessage] = useState("");
 
   useEffect(() => {
     const loadGrant = async () => {
@@ -133,6 +144,46 @@ export default function GrantDetails() {
     } catch (agentError) {
       setAgentStatus("error");
       setAgentMessage(agentError.message);
+    }
+  };
+
+  const updateApplicationField = (event) => {
+    const { name, value } = event.target;
+    setApplicationForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const applyForGrant = async (event) => {
+    event.preventDefault();
+    setApplicationStatus("loading");
+    setApplicationMessage("");
+
+    try {
+      const token = await getBackendAuthToken();
+      const response = await fetch(`${getApiBaseUrl()}/api/grants/${slug}/apply`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ...applicationForm,
+          evidenceNotes: applicationForm.evidenceNotes || notes,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not submit your application");
+      }
+
+      setApplicationStatus("success");
+      setApplicationMessage(
+        "Application submitted to the funder for eligibility review.",
+      );
+      setApplicationForm(initialApplicationForm);
+    } catch (applyError) {
+      setApplicationStatus("error");
+      setApplicationMessage(applyError.message);
     }
   };
 
@@ -337,6 +388,135 @@ export default function GrantDetails() {
                   {agentMessage}
                 </p>
               ) : null}
+
+              <form
+                onSubmit={applyForGrant}
+                className="rounded-xl border border-blue-100 bg-blue-50 p-5"
+              >
+                <h2 className="text-xl font-bold text-blue-950">
+                  Apply for this grant
+                </h2>
+                <p className="mt-2 text-xs leading-5 text-slate-600">
+                  Your application goes to the funder dashboard for eligibility
+                  approval.
+                </p>
+
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <label
+                      htmlFor="projectTitle"
+                      className="text-sm font-bold text-blue-950"
+                    >
+                      Project title
+                    </label>
+                    <input
+                      id="projectTitle"
+                      name="projectTitle"
+                      value={applicationForm.projectTitle}
+                      onChange={updateApplicationField}
+                      required
+                      className="mt-2 w-full rounded-lg border border-blue-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder="After-school STEM access"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="requestedAmount"
+                      className="text-sm font-bold text-blue-950"
+                    >
+                      Requested amount
+                    </label>
+                    <input
+                      id="requestedAmount"
+                      name="requestedAmount"
+                      type="number"
+                      min="0"
+                      value={applicationForm.requestedAmount}
+                      onChange={updateApplicationField}
+                      className="mt-2 w-full rounded-lg border border-blue-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder={String(grant.maxAmount || "")}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="proposalSummary"
+                      className="text-sm font-bold text-blue-950"
+                    >
+                      Proposal summary
+                    </label>
+                    <textarea
+                      id="proposalSummary"
+                      name="proposalSummary"
+                      value={applicationForm.proposalSummary}
+                      onChange={updateApplicationField}
+                      required
+                      rows={4}
+                      className="mt-2 w-full resize-none rounded-lg border border-blue-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder="Summarize your project, audience, impact, and why it fits this grant."
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="evidenceNotes"
+                      className="text-sm font-bold text-blue-950"
+                    >
+                      Eligibility evidence
+                    </label>
+                    <textarea
+                      id="evidenceNotes"
+                      name="evidenceNotes"
+                      value={applicationForm.evidenceNotes}
+                      onChange={updateApplicationField}
+                      rows={3}
+                      className="mt-2 w-full resize-none rounded-lg border border-blue-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder="Mention eligibility proof, documents, or organizational fit."
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="contactEmail"
+                      className="text-sm font-bold text-blue-950"
+                    >
+                      Contact email
+                    </label>
+                    <input
+                      id="contactEmail"
+                      name="contactEmail"
+                      type="email"
+                      value={applicationForm.contactEmail}
+                      onChange={updateApplicationField}
+                      className="mt-2 w-full rounded-lg border border-blue-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder="you@example.org"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={applicationStatus === "loading"}
+                  className="mt-5 w-full rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+                >
+                  {applicationStatus === "loading"
+                    ? "Submitting application..."
+                    : "Submit application"}
+                </button>
+
+                {applicationMessage ? (
+                  <p
+                    className={`mt-4 rounded-lg px-4 py-3 text-sm font-semibold ${
+                      applicationStatus === "success"
+                        ? "bg-white text-cyan-800"
+                        : "bg-amber-50 text-amber-800"
+                    }`}
+                  >
+                    {applicationMessage}
+                  </p>
+                ) : null}
+              </form>
             </aside>
           </div>
         </div>
